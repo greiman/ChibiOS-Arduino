@@ -1,0 +1,12 @@
+chBlink - Blink with two tasks and a Semaphore
+chBlinkPrint - Simple demo of three threads
+chContextTime - Measure context switch time with an oscilloscope
+chCoop - Demonstration of cooperative scheduling
+chDataSharing - Simple demo using a mutex for data sharing.
+chFifoDataLogger - Log data to an SD card with two threads
+chIsrSemaphore - Schedule a task from an ISR with a semaphore
+chJitter - Test of scheduling time jitter
+chMailPool - Memory pool and mailbox with two senders and one receiver
+chMutex - Use mutex to prevent print calls from being scrambled
+chRoundRobin - Run two tasks round-robin
+chSemaphore - Example of counting semaphores
