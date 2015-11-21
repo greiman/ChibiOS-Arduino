@@ -1,20 +1,24 @@
-// demo runing two tasks round-robin
+// Demo runing two threads round-robin.
+// Both threads use wait loops.  Each thread will execute
+// for one quantum then be preempted.
 //
 #include <ChibiOS_AVR.h>
 //------------------------------------------------------------------------------
 // 32 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waBlink, 32);
+static THD_WORKING_AREA(waBlink, 32);
 
-static msg_t blink(void *arg) {
+static THD_FUNCTION(blink, arg) {
   // blink twice per second
   pinMode(13, OUTPUT);
+  uint32_t next = millis();
   while (1) {
     digitalWrite(13, HIGH);
-    chThdSleepMilliseconds(100);
+    next += 100;
+    while((int32_t)(millis() - next) < 0) {}
     digitalWrite(13, LOW);
-    chThdSleepMilliseconds(400);
+    next += 400;
+    while((int32_t)(millis() - next) < 0) {}
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 void setup() {
@@ -22,6 +26,10 @@ void setup() {
   // wait for USB Serial
   while (!Serial) {}
   
+  if (CH_CFG_TIME_QUANTUM == 0) {
+    Serial.println("CH_CFG_TIME_QUANTUM must be nonzero for round-robin.");
+    while(1) {}
+  }
   // start kernel and continue main thread as loop
   chBegin(mainThread);
   while(1);
@@ -29,17 +37,15 @@ void setup() {
 //------------------------------------------------------------------------------
 // main thread and runs at NORMALPRIO
 void mainThread() {
-  uint32_t m = 1 + millis()/1000;
-  
   // start blink thead
   chThdCreateStatic(waBlink, sizeof(waBlink), NORMALPRIO, blink, NULL);
   
-  // print time every second
+  // print millis every second
+  uint32_t next = 0;
   while (1) {
-    Serial.println(m++);
-  
-    // sleep until next second
-    chThdSleepMilliseconds(1000*m - millis());
+    next += 1000;
+    while ((int32_t)(millis() - next) < 0) {}
+    Serial.println(millis());
   }
 }
 //------------------------------------------------------------------------------

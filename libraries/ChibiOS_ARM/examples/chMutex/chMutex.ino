@@ -4,10 +4,10 @@
 MUTEX_DECL(demoMutex);
 
 // data structures and stack for thread 2
-static WORKING_AREA(waTh2, 100);
+static THD_WORKING_AREA(waTh2, 100);
 
 // data structures and stack for thread 3
-static WORKING_AREA(waTh3, 100);
+static THD_WORKING_AREA(waTh3, 100);
 //------------------------------------------------------------------------------
 void notify(const char* name, int state) {
 
@@ -20,10 +20,10 @@ void notify(const char* name, int state) {
   Serial.println(state);
   
   // exit protected region
-  chMtxUnlock();
+  chMtxUnlock(&demoMutex);
 }
 //------------------------------------------------------------------------------
-msg_t thdFcn(void  *args) {
+static THD_FUNCTION(thdFcn, args) {
   while (true) {
     notify((const char*)args, 0);
     chThdSleep(1000);

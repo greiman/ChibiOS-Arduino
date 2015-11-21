@@ -26,12 +26,12 @@ void isrFcn() {
   // Only ISR processing is to save time
   tIsr = micros();
 
-  chSysLockFromIsr();
+  chSysLockFromISR();
   /* Invocation of some I-Class system APIs, never preemptable.*/
 
   // signal handler task
   chBSemSignalI(&isrSem);
-  chSysUnlockFromIsr();
+  chSysUnlockFromISR();
 
   /* More IRQ handling code, again preemptable.*/
 
@@ -40,9 +40,9 @@ void isrFcn() {
 }
 //------------------------------------------------------------------------------
 // handler task for interrupt
-static WORKING_AREA(waThd1, 200);
+static THD_WORKING_AREA(waThd1, 200);
 
-msg_t handler(void *arg) {
+static THD_FUNCTION(handler, arg) {
   while (1) {
     // wait for event
     chBSemWait(&isrSem);

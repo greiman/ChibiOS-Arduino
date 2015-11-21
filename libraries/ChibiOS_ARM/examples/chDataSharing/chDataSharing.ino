@@ -29,19 +29,17 @@ volatile int dataZ;
 //------------------------------------------------------------------------------
 // Thread 1, high priority to read sensor.
 // 64 byte stack beyond task switch and interrupt needs.
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
 
   // Read data every 13 ms.
   // Use 13 ms so print interval is not a multiple of sensor interval.
   // Try 10 ms to see synchronous effect.
-  systime_t wakeTime = chTimeNow();
 
   while (1) {
-    // Add ticks for 13 ms.  Use 13 so 1000 is not a multiple of interval.
-    wakeTime += MS2ST(13);
-    chThdSleepUntil(wakeTime);
+    // Use 13 so 1000 is not a multiple of interval.
+    chThdSleepMilliseconds(13);
 
     // Use temp variables to acquire data.
     uint32_t tmpT = millis();
@@ -56,22 +54,21 @@ static msg_t Thread1(void *arg) {
     dataT = tmpT;
     dataX = tmpX;
     dataY = tmpY;
-    dataZ = tmpX;
+    dataZ = tmpZ;
 
     // Unlock data access.
-    chMtxUnlock();
+    chMtxUnlock(&dataMutex);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 // thread 2 - print data every second.
 // 128 byte stack beyond task switch and interrupt needs.
-static WORKING_AREA(waThread2, 128);
+static THD_WORKING_AREA(waThread2, 128);
 
-static msg_t Thread2(void *arg) {
+static THD_FUNCTION(Thread2, arg) {
 
   // Print count every second.
-  systime_t wakeTime = chTimeNow();
+  systime_t wakeTime = chVTGetSystemTime();
   while (1) {
     // Sleep for one second.
     wakeTime += MS2ST(1000);
@@ -87,7 +84,7 @@ static msg_t Thread2(void *arg) {
     int tmpZ = dataZ;
 
     // Unlock data access.
-    chMtxUnlock();
+    chMtxUnlock(&dataMutex);
 
     // Print shared data.
     Serial.print("dataAge: ");

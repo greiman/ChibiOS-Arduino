@@ -3,6 +3,7 @@
 //
 // The FIFO uses two semaphores to synchronize between tasks.
 
+#include <SPI.h>
 #include <ChibiOS_AVR.h>
 #include <SdFat.h>
 //
@@ -35,9 +36,9 @@ struct FifoItem_t {
 FifoItem_t fifoArray[FIFO_SIZE];
 //------------------------------------------------------------------------------
 // Declare a stack with 32 bytes beyond task switch and interrupt needs.
-static WORKING_AREA(waThread1, 32);
+static THD_WORKING_AREA(waThread1, 32);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
   // index of record to be filled
   size_t fifoHead = 0;
 
@@ -50,7 +51,7 @@ static msg_t Thread1(void *arg) {
   while (1) {
     chThdSleep(intervalTicks);
     // get a buffer
-    if (chSemWaitTimeout(&fifoSpace, TIME_IMMEDIATE) != RDY_OK) {
+    if (chSemWaitTimeout(&fifoSpace, TIME_IMMEDIATE) != MSG_OK) {
       // fifo full indicate missed point
       error++;
       continue;
@@ -71,7 +72,6 @@ static msg_t Thread1(void *arg) {
     // advance FIFO index
     fifoHead = fifoHead < (FIFO_SIZE - 1) ? fifoHead + 1 : 0;
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 void setup() {

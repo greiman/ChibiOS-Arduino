@@ -9,9 +9,9 @@ volatile uint32_t count = 0;
 //------------------------------------------------------------------------------
 // thread 1 - high priority for blinking LED
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1 ,arg) {
   pinMode(LED_PIN, OUTPUT);
   
   // Flash led every 200 ms.
@@ -28,14 +28,13 @@ static msg_t Thread1(void *arg) {
     // Sleep for 150 milliseconds.
     chThdSleepMilliseconds(150);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 // thread 2 - print main thread count every second
 // 100 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread2, 100);
+static THD_WORKING_AREA(waThread2, 100);
 
-static msg_t Thread2(void *arg) {
+static THD_FUNCTION(Thread2, arg) {
 
   // print count every second
   while (1) {

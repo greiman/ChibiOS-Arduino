@@ -1,0 +1,179 @@
+Only in src/utility: board.h
+diff org_src/utility/chconf.h src/utility/chconf.h
+49c49
+< #define CH_CFG_ST_FREQUENCY                 10000
+---
+> #define CH_CFG_ST_FREQUENCY                 1000 // WHG
+59c59
+< #define CH_CFG_ST_TIMEDELTA                 2
+---
+> #define CH_CFG_ST_TIMEDELTA                 0 // WHG
+82c82
+< #define CH_CFG_TIME_QUANTUM                 0
+---
+> #define CH_CFG_TIME_QUANTUM                 20  // WHG
+95c95
+< #define CH_CFG_MEMCORE_SIZE                 0
+---
+> #define CH_CFG_MEMCORE_SIZE                 128  // WHG
+291c291
+< #define CH_CFG_USE_HEAP                     TRUE
+---
+> #define CH_CFG_USE_HEAP                     FALSE  // WHG
+311c311
+< #define CH_CFG_USE_DYNAMIC                  TRUE
+---
+> #define CH_CFG_USE_DYNAMIC                  FALSE  // WHG
+386c386
+< #define CH_DBG_FILL_THREADS                 FALSE
+---
+> #define CH_DBG_FILL_THREADS                 TRUE  // WHG
+diff org_src/utility/chcore_v7m.c src/utility/chcore_v7m.c
+53c53,64
+< 
+---
+> // WHG - Mods for Arduino
+> #ifdef CORE_TEENSY
+> // Teensy 3.x
+> #define SVC_Handler svcall_isr
+> #define PendSV_Handler pendablesrvreq_isr
+> #else  // CORE_TEENSY
+> // Due
+> #define SVC_Handler svcHook
+> #define PendSV_Handler pendSVHook
+> #endif  // CORE_TEENSY
+> // WHG
+> //------------------------------------------------------------------------------
+diff org_src/utility/chcore_v7m.h src/utility/chcore_v7m.h
+375c375
+< 
+---
+> #if 0  // WHG
+378c378
+< 
+---
+> #endif  // WHG
+381a382
+> #ifdef CORE_TEENSY  // WHG
+385c386
+< 
+---
+> #endif // CORE_TEENSY WHG
+547c548
+< 
+---
+> #ifdef CORE_TEENSY  // WHG
+548a550,552
+> #else  // WHG
+>   return 0;
+> #endif  // CORE_TEENSY  WHG  
+Only in src/utility: chcore_v7m_asm.c
+diff org_src/utility/cmparams.h src/utility/cmparams.h
+37c37,41
+< #define CORTEX_MODEL            4
+---
+> #ifdef CORE_TEENSY
+> #define CORTEX_MODEL            4  // WHG
+> #else  // CORE_TEENSY
+> #define CORTEX_MODEL            3  // WHG
+> #endif  // CORE_TEENSY
+42c46
+< #define CORTEX_HAS_FPU          1
+---
+> #define CORTEX_HAS_FPU          0  // WHG
+75c79,93
+< #include "stm32f4xx.h"
+---
+> //#include "stm32f4xx.h"  WHG
+> #include <Arduino.h>  // WHG
+> #ifdef CORE_TEENSY
+> #undef __disable_irq
+> #undef __enable_irq
+> typedef enum IRQn {
+>   SVCall_IRQn                   =  -5,      /* 11 SV Call Interrupt */
+>   DebugMonitor_IRQn             =  -4,      /* 12 Debug Monitor Interrupt */
+>   PendSV_IRQn                   =  -2,      /* 14 Pend SV Interrupt */
+>   SysTick_IRQn                  =  -1,      /* 15 System Tick Interrupt */
+> } IRQn_Type;
+> 
+> #define __NVIC_PRIO_BITS 4
+> #include "../CMSIS/core_cm4.h"
+> #endif  // CORE_TEENSY
+76a95
+> #if 0 // WHG
+88c107
+< 
+---
+> #endif  // WHG
+diff org_src/utility/hal.h src/utility/hal.h
+28a29,32
+> #include "nvic.h" // WHG
+> #include "mcuconf.h"  // WHG
+> #include "hal_lld.h"  // WHG
+> #if 0  // WHG
+63c67
+< 
+---
+> #endif  // WHG
+71c75
+< 
+---
+> #if 0 // WHG
+82c86
+< 
+---
+> #endif  // WHG
+diff org_src/utility/mcuconf.h src/utility/mcuconf.h
+29a30,31
+> #define WHG_ST_IRQ_PRIORITY 0XF
+> 
+diff org_src/utility/st_lld.c src/utility/st_lld.c
+51a52,95
+> #if (OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC) || defined(__DOXYGEN__)
+> /**
+>  * @brief   System Timer vector.
+>  * @details This interrupt is used for system tick in periodic mode.
+>  *
+>  * @isr
+>  */
+>  // WHG
+> int sysTickEnabled = 0;
+> #ifdef CORE_TEENSY
+> // Teensy 3.x
+> 
+> extern volatile uint32_t systick_millis_count;
+> void systick_isr() {
+>   systick_millis_count++;
+>   if (sysTickEnabled) {
+>     OSAL_IRQ_PROLOGUE();
+> 
+>     osalSysLockFromISR();
+>     osalOsTimerHandlerI();
+>     osalSysUnlockFromISR();
+> 
+>     OSAL_IRQ_EPILOGUE();
+>   }
+> }
+> 
+> #else  // CORE_TEENSY
+> // Due
+> 
+> int sysTickHook(void) { 
+>   if (sysTickEnabled) {
+> 
+>     OSAL_IRQ_PROLOGUE();
+> 
+>     osalSysLockFromISR();
+>     osalOsTimerHandlerI();
+>     osalSysUnlockFromISR();
+> 
+>     OSAL_IRQ_EPILOGUE();
+>   }
+>   return 0;
+> }
+> #endif  // CORE_TEENSY
+> #endif /* OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC */
+62a107,109
+> #if OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC
+>   nvicSetSystemHandlerPriority(HANDLER_SYSTICK, WHG_ST_IRQ_PRIORITY);
+> #endif /* OSAL_ST_MODE == OSAL_ST_MODE_PERIODIC */  

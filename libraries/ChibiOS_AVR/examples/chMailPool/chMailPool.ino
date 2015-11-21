@@ -22,13 +22,13 @@ msg_t letter[MB_COUNT];
 MAILBOX_DECL(mail, &letter, MB_COUNT);
 //------------------------------------------------------------------------------
 // data structures and stack for thread 2
-static WORKING_AREA(waTh2, 64);
+static THD_WORKING_AREA(waTh2, 64);
 
 // data structures and stack for thread 3
-static WORKING_AREA(waTh3, 64);
+static THD_WORKING_AREA(waTh3, 64);
 //------------------------------------------------------------------------------
 // send message every 1000 ticks
-msg_t thdFcn(void* name) {
+static THD_FUNCTION(thdFcn, name) {
   int msg = 0;
 
   while (1) {
@@ -45,7 +45,7 @@ msg_t thdFcn(void* name) {
 
     // send message
     msg_t s = chMBPost(&mail, (msg_t)p, TIME_IMMEDIATE);
-    if (s != RDY_OK) {
+    if (s != MSG_OK) {
       Serial.println("chMBPost failed");
       while(1);  
     }
@@ -67,7 +67,7 @@ void setup() {
 void mainThread() {
 
   // fill pool with PoolObject array
-  for (int i = 0; i < MB_COUNT; i++) {
+  for (size_t i = 0; i < MB_COUNT; i++) {
     chPoolFree(&memPool, &PoolObject[i]);
   }
   // schedule thread 2

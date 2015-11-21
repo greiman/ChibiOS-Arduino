@@ -12,9 +12,9 @@ volatile  uint16_t tmax = 0;
 volatile  uint16_t tmin = 0XFFFF;
 //------------------------------------------------------------------------------
 // thread for sleep interval
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
   // initialize tlast
   chThdSleep(1);
   uint32_t tlast = micros();
@@ -33,7 +33,6 @@ static msg_t Thread1(void *arg) {
     if (diff > tmax) tmax = diff;
     tlast = tmp;
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 void setup() {

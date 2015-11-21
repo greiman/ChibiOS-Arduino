@@ -7,26 +7,25 @@
 const uint8_t LED_PIN = 13;
 
 // Semaphore to trigger context switch
-Semaphore sem;
+SEMAPHORE_DECL(sem, 0);
 //------------------------------------------------------------------------------
 // thread 1 - high priority thread to set pin low
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
 
   while (TRUE) {
     chSemWait(&sem);
     digitalWrite(LED_PIN, LOW);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 // thread 2 - lower priority thread to toggle LED and trigger thread 1
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread2, 64);
+static THD_WORKING_AREA(waThread2, 64);
 
-static msg_t Thread2(void *arg) {
+static THD_FUNCTION(Thread2, arg) {
   pinMode(LED_PIN, OUTPUT);
   while (TRUE) {
     // first pulse to get time with no context switch
@@ -39,7 +38,6 @@ static msg_t Thread2(void *arg) {
     // sleep until next tick (1024 microseconds tick on Arduino)
     chThdSleep(1);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 void setup() {
@@ -48,9 +46,6 @@ void setup() {
 }
 //------------------------------------------------------------------------------
 void chSetup() {
-  // initialize semaphore
-  chSemInit(&sem, 0);
-
   // start high priority thread
   chThdCreateStatic(waThread1, sizeof(waThread1),
     NORMALPRIO+2, Thread1, NULL);

@@ -19,9 +19,9 @@ volatile uint32_t maxDelay = 0;
 //------------------------------------------------------------------------------
 // thread 1 blink LED
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
   pinMode(LED_PIN, OUTPUT);
   while (TRUE) {
     digitalWrite(LED_PIN, HIGH);
@@ -29,14 +29,13 @@ static msg_t Thread1(void *arg) {
     digitalWrite(LED_PIN, LOW);
     chThdSleepMilliseconds(150);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 // thread 2 increment a counter and records max delay
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread2, 64);
+static THD_WORKING_AREA(waThread2, 64);
 
-static msg_t Thread2(void *arg) {
+static THD_FUNCTION(Thread2, arg) {
 
   while (TRUE) {
     count++;
@@ -54,9 +53,9 @@ void setup() {
   while (!Serial) {}
   Serial.println();
   
-  if (CH_TIME_QUANTUM) {
-    Serial.println("You must set CH_TIME_QUANTUM zero in");
-    Serial.println("libraries/ChibiOS_AVR/utility/chconf.h");
+  if (CH_CFG_TIME_QUANTUM) {
+    Serial.println("You must set CH_CFG_TIME_QUANTUM zero in");
+    Serial.println("libraries/ChibiOS_AVR/src/utility/chconf.h");
     Serial.println("to enable cooperative scheduling.");
     while(1);
   }

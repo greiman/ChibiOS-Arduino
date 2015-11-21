@@ -5,12 +5,12 @@
 SEMAPHORE_DECL(twoSlots, 2);
 
 // data structures and stack for thread 2
-static WORKING_AREA(waTh2, 100);
+static THD_WORKING_AREA(waTh2, 100);
 
 // data structures and stack for thread 3
-static WORKING_AREA(waTh3, 100);
+static THD_WORKING_AREA(waTh3, 100);
 //------------------------------------------------------------------------------
-static msg_t thdFcn(void *name) {
+static THD_FUNCTION(thdFcn, name) {
  while (true) {
 
   // wait for slot

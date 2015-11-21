@@ -10,26 +10,25 @@ SEMAPHORE_DECL(sem, 0);
 // Thread 1, turn the LED off when signalled by thread 2.
 
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread1, 64);
+static THD_WORKING_AREA(waThread1, 64);
 
-static msg_t Thread1(void *arg) {
+static THD_FUNCTION(Thread1, arg) {
 
-  while (!chThdShouldTerminate()) {
+  while (!chThdShouldTerminateX()) {
     // Wait for signal from thread 2.
     chSemWait(&sem);
 
     // Turn LED off.
     digitalWrite(LED_PIN, LOW);
   }
-  return 0;
 }
 //------------------------------------------------------------------------------
 // Thread 2, turn the LED on and signal thread 1 to turn the LED off.
 
 // 64 byte stack beyond task switch and interrupt needs
-static WORKING_AREA(waThread2, 64);
+static THD_WORKING_AREA(waThread2, 64);
 
-static msg_t Thread2(void *arg) {
+static THD_FUNCTION(Thread2, arg) {
   pinMode(LED_PIN, OUTPUT);
   while (1) {
     digitalWrite(LED_PIN, HIGH);
@@ -43,7 +42,6 @@ static msg_t Thread2(void *arg) {
     // Sleep for 200 milliseconds.
     chThdSleepMilliseconds(200);
   }
-  return 0;  
 }
 //------------------------------------------------------------------------------
 void setup() {
