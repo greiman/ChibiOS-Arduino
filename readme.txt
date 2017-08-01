@@ -1,4 +1,4 @@
-Please try the newer version of ChibiOS/RT in the ChRT repository.
+Please try the newer version of ChibiOS/RT in the ChRt repository.
 
 It is version 4.0.0 of the ChibiOS/RT kernel from version 
 17.6 of ChibiOS.
