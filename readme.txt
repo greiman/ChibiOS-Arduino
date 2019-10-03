@@ -1,9 +1,10 @@
 Please try the newer version of ChibiOS/RT in the ChRt repository.
 
-It is version 4.0.0 of the ChibiOS/RT kernel from version 
-17.6 of ChibiOS.
+It is version 6.0.3 of the ChibiOS/RT kernel from release 
+19.1.3 of ChibiOS.
 
-This is a port of ChibiOS/RT version 3.0.3 for Arduino.
+This is a port of ChibiOS/RT version 3.0.3 for Arduino and will
+not be updated.
 
 AVR, Due, and Teensy 3.x boards are supported.
 
